@@ -14,7 +14,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(Category::all());
     }
 
     /**
@@ -35,11 +35,15 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:income,expense',
         ]);
-        return Category::create($validated);
+
+        $category = Category::create([
+            'name' => $request->name,
+        ]);
+
+        return response()->json($category, 201);
     }
 
     /**
@@ -48,9 +52,10 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show(Category $category)
+    public function show($id)
     {
-        //
+        $category = Category::findOrFail($id);
+        return response()->json($category);
     }
 
     /**
@@ -71,14 +76,19 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'type' => 'sometimes|required|in:income,expense',
+        $category = Category::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
         ]);
-        $category->update($validated);
-        return $category;
+
+        $category->update([
+            'name' => $request->name,
+        ]);
+
+        return response()->json($category);
     }
 
     /**
@@ -87,9 +97,11 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy($id)
     {
+        $category = Category::findOrFail($id);
         $category->delete();
-        return response()->noContent();
+
+        return response()->json(['message' => 'Category deleted']);
     }
 }
