@@ -35,7 +35,11 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:income,expense',
+        ]);
+        return Category::create($validated);
     }
 
     /**
@@ -69,7 +73,12 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'type' => 'sometimes|required|in:income,expense',
+        ]);
+        $category->update($validated);
+        return $category;
     }
 
     /**
@@ -80,6 +89,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+        return response()->noContent();
     }
 }
