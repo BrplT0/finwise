@@ -12,8 +12,7 @@ class Category extends Model
     protected $fillable = [
         'name',
         'type',
-        'color',
-        'is_active'
+        'description'
     ];
 
     // İlişkiler
@@ -25,6 +24,11 @@ class Category extends Model
     public function expenses()
     {
         return $this->hasMany(Expense::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
     }
 
     // Scope'lar
