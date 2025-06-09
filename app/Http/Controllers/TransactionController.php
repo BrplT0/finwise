@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class TransactionController extends Controller
@@ -14,7 +15,8 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        return response()->json(Transaction::all());
+        $transactions = Transaction::with(['category', 'user'])->latest()->get();
+        return view('transactions.index', compact('transactions'));
     }
 
     /**
@@ -24,7 +26,8 @@ class TransactionController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('transactions.create', compact('categories'));
     }
 
     /**
@@ -36,14 +39,24 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'description' => 'required|string|max:255',
-            'amount' => 'required|numeric',
+            'amount' => 'required|numeric|min:0',
+            'type' => 'required|in:income,expense',
             'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'transaction_date' => 'required|date'
         ]);
 
-        $transaction = Transaction::create($request->all());
+        $transaction = Transaction::create([
+            'amount' => $request->amount,
+            'type' => $request->type,
+            'category_id' => $request->category_id,
+            'description' => $request->description,
+            'transaction_date' => $request->transaction_date,
+            'user_id' => auth()->id()
+        ]);
 
-        return response()->json($transaction, 201);
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaction created successfully.');
     }
 
     /**
@@ -52,12 +65,10 @@ class TransactionController extends Controller
      * @param  \App\Models\Transaction  $transaction
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Transaction $transaction)
     {
-        $transaction = Transaction::findOrFail($id);
-        return response()->json($transaction);
+        return view('transactions.show', compact('transaction'));
     }
-
 
     /**
      * Show the form for editing the specified resource.
@@ -67,7 +78,8 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
-        //
+        $categories = Category::all();
+        return view('transactions.edit', compact('transaction', 'categories'));
     }
 
     /**
@@ -77,19 +89,20 @@ class TransactionController extends Controller
      * @param  \App\Models\Transaction  $transaction
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Transaction $transaction)
     {
-        $transaction = Transaction::findOrFail($id);
-
         $request->validate([
-            'description' => 'required|string|max:255',
-            'amount' => 'required|numeric',
+            'amount' => 'required|numeric|min:0',
+            'type' => 'required|in:income,expense',
             'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'transaction_date' => 'required|date'
         ]);
 
         $transaction->update($request->all());
 
-        return response()->json($transaction);
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaction updated successfully.');
     }
 
     /**
@@ -98,11 +111,11 @@ class TransactionController extends Controller
      * @param  \App\Models\Transaction  $transaction
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Transaction $transaction)
     {
-        $transaction = Transaction::findOrFail($id);
         $transaction->delete();
 
-        return response()->json(['message' => 'Transaction deleted']);
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaction deleted successfully.');
     }
 }

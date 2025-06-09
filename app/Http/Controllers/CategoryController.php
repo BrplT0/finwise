@@ -14,7 +14,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return response()->json(Category::all());
+        $categories = Category::all();
+        return view('categories.index', compact('categories'));
     }
 
     /**
@@ -24,7 +25,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('categories.create');
     }
 
     /**
@@ -37,13 +38,14 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'type' => 'required|in:income,expense',
+            'description' => 'nullable|string'
         ]);
 
-        $category = Category::create([
-            'name' => $request->name,
-        ]);
+        $category = Category::create($request->all());
 
-        return response()->json($category, 201);
+        return redirect()->route('categories.index')
+            ->with('success', 'Category created successfully.');
     }
 
     /**
@@ -52,10 +54,9 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Category $category)
     {
-        $category = Category::findOrFail($id);
-        return response()->json($category);
+        return view('categories.show', compact('category'));
     }
 
     /**
@@ -66,7 +67,7 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        //
+        return view('categories.edit', compact('category'));
     }
 
     /**
@@ -76,19 +77,18 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Category $category)
     {
-        $category = Category::findOrFail($id);
-
         $request->validate([
             'name' => 'required|string|max:255',
+            'type' => 'required|in:income,expense',
+            'description' => 'nullable|string'
         ]);
 
-        $category->update([
-            'name' => $request->name,
-        ]);
+        $category->update($request->all());
 
-        return response()->json($category);
+        return redirect()->route('categories.index')
+            ->with('success', 'Category updated successfully.');
     }
 
     /**
@@ -97,11 +97,11 @@ class CategoryController extends Controller
      * @param  \App\Models\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Category $category)
     {
-        $category = Category::findOrFail($id);
         $category->delete();
 
-        return response()->json(['message' => 'Category deleted']);
+        return redirect()->route('categories.index')
+            ->with('success', 'Category deleted successfully.');
     }
 }
