@@ -160,6 +160,6 @@ npm run dev
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
-Project Owner - [@yourusername](https://github.com/BrplT0)
+Project Owner - [@BrplT0](https://github.com/BrplT0)
 
-Project Link: [https://github.com/yourusername/finwise](https://github.com/BrplT0/finwise)
+Project Link: [https://github.com/BrplT0/finwise](https://github.com/BrplT0/finwise)
